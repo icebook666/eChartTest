@@ -1,0 +1,7 @@
+@CHARSET "UTF-8";
+.mybox {
+	border-color:#009900;
+	border-width:3px;
+	border-top-style:solid;
+	padding:5px 5px 5px 5px;
+}

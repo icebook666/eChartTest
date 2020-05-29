@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<script type="text/javascript" src="js/echarts.min.js"></script>
+<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		//指定圖標的配置和數據
+		var option = {
+			title : {
+				text : 'ECharts 入门示例'
+			},
+			tooltip : {},
+			legend : {
+				data : [ '销量' ]
+			},
+			xAxis : {
+				data : [ "衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子" ],
+				triggerEvent:true
+			},
+			yAxis : {},
+			series : [ {
+				name : '销量',
+				type : 'line',
+				data : [ 5, 20, 36, 10, 10, 20 ]
+			} ]
+		};
+		//初始化echarts實例
+		var myChart = echarts.init(document.getElementById('chartmain'));
+		//使用制定的配置項和數據顯示圖表
+		myChart.setOption(option);
+		
+		myChart.on('click', function (parmas) {
+			alert(parmas.name);
+		});
+		
+	});
+</script>
+<title>My First E-Chart</title>
+</head>
+<body>
+<div id="chartmain" style="width:600px; height: 400px;"></div>
+</body>
+</html>

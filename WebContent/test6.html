@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<script type="text/javascript" src="js/echarts.min.js"></script>
+<script type="text/javascript" src="theme/macarons.js"></script>
+<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<title>dynamic Test</title>
+<script>
+	var main_classify = "amount";
+
+	$(document).ready(function() {
+		$("#count_file_number").addClass("btn-success");
+		$("#count_file_number").removeClass("btn-outline-success");
+		
+		changeIt();
+		
+		$("#count_file_number").click(function() {
+			main_classify = "amount";
+			$("#count_file_number").addClass("btn-success");
+			$("#count_file_number").removeClass("btn-outline-success");
+			$("#count_file_size").addClass("btn-outline-success");
+			$("#count_file_size").removeClass("btn-success");
+			changeIt();
+		});
+		
+		$("#count_file_size").click(function() {
+			main_classify = "size";
+			$("#count_file_size").addClass("btn-success");
+			$("#count_file_size").removeClass("btn-outline-success");
+			$("#count_file_number").addClass("btn-outline-success");
+			$("#count_file_number").removeClass("btn-success");
+			changeIt();
+		});
+		
+	});
+	
+	function changeIt() {
+		getChartByDepartmentMember(main_classify);
+	}
+	
+	function getChartByDepartmentMember(classify) {
+		$.ajax({
+			type : "post",
+			url : "jsp/department_usb_history.jsp",
+			data : {
+				classify : classify
+			},
+			dataType : "json",
+			beforeSend:function(XMLHttpRequest){
+				$('#loadingModal').modal({backdrop: 'static', keyboard: false}); //遮罩不關閉設定
+				//開啟遮罩
+				$("#loadingModal").modal('show');
+				$('#main').html("");
+	        },
+			success : function(data, textStatus) {
+				var options = data.options;
+	    		//Details of the Chart in JSON String
+	    		var myChart = [];
+	    		var temp;
+	    		for(var i = 0; i < options.length; i++){
+	    		    var chartDiv = "<div style='width:90%; height: 200px;' id ='chart" + i + "'></div>";
+	    		    $('#main').append(chartDiv);
+	    		    // 準備好DOM初始化echarts實例
+	    		    temp = echarts.init(document.getElementById('chart'+i), 'macarons');
+	    		    myChart.push(temp);
+	    		}
+	    		//alert(myChart);
+	    		for(var i = 0 ; i < options.length; i++){
+	    		    // 使用剛指定的配置項和數據顯示圖表
+	    			var myChildTitle = options[i].mainTitle;
+					var myChildSubtitle = options[i].subTitle;
+					var myChildlegendData = options[i].legendData;
+					var myChildCategoryData = options[i].categoryData;
+					var myChildSeriesData = options[i].seriesData;
+					var myChildSelectedFlag = options[i].selectedFlag;
+					
+					myChart[i].setOption({
+					    title: {
+					    	//top: '0%',
+					        text: myChildTitle
+					        //subtext: myChildSubtitle
+					    },
+					    tooltip: {
+					        trigger: 'axis',
+					        axisPointer : {
+					            //type : 'shadow'
+					        	type: 'cross',
+					            crossStyle: {
+					                color: '#999'
+					            }
+					        }
+					    },
+					    legend: {
+					    	top: '0%',
+					    	itemWidth: 30,
+					        itemHeight: 20,
+					        data: myChildlegendData,
+					        selected: myChildSelectedFlag
+					    },
+					    grid: {
+					        left: '3%',
+					        right: '3%',
+					        top: '20%',
+					        bottom: '12%',
+					        containLabel: true
+					    },
+					    xAxis: {
+					        type: 'category',
+					        //boundaryGap: false,
+					        axisLabel:{
+		                        rotate: 30,
+		                        interval:0
+		                        //fontSize: 18
+		                    },
+		                    axisPointer: {
+		                        type: 'shadow'
+		                    },
+					        data: myChildCategoryData
+					    },
+					    yAxis: {
+					        type: 'value',
+					        name : '',
+					        axisLabel:{
+		                        //fontSize: 18
+		                    },
+		                    axisPointer: {
+		                        snap: true,
+		                        crossStyle: {
+		                            color: '#999'
+		                        }
+		                    }
+					    },
+					    series: [
+							{
+							    name: myChildlegendData[0],
+							    type: 'bar',
+							    //barGap: '30%', //柱間距離
+								barCategoryGap: '30%', //數目間柱形距離
+							    stack: 'amount',
+							    label: {
+							        normal: {
+							            //show: true,
+							            position: 'insideRight',
+										formatter : function(p) {
+											return p.value > 0 ? (p.value) : '';
+										}
+							        }
+							    },
+							    data: myChildSeriesData[0]
+							},   
+							{
+							    name: myChildlegendData[1],
+							    type: 'bar',
+							    //barGap: '30%', //柱間距離
+								barCategoryGap: '30%', //數目間柱形距離
+							    stack: 'amount',
+							    label: {
+							        normal: {
+							            //show: true,
+							            position: 'insideRight',
+										formatter : function(p) {
+											return p.value > 0 ? (p.value) : '';
+										}
+							        }
+							    },
+							    data: myChildSeriesData[1]
+							},
+							{
+					            name: myChildlegendData[2],
+					            type: 'line',
+					            //symbol: 'circle',
+					            symbolSize: 5,
+					            lineStyle: {
+					            	color: '#0000ff',
+					            	width: 2
+					            },
+					            itemStyle:{
+					            	normal:{
+					            		color:'#0000ff',
+					            	}
+					            },
+		                        smooth: 0.1,
+					            data: myChildSeriesData[2]
+					        }
+					    ]
+					});
+	    		    
+	    		}
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+			},
+			complete:function(data, status){
+				//關閉遮罩
+				$("#loadingModal").modal('hide');
+			}
+		});
+	}
+</script>
+</head>
+<body>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12" style="padding-top: 100px">
+			<table>
+				<tr>
+					<td width="10%">
+						<button type="button" class="btn btn-primary btn-lg disabled">部門成員每月使用USB統計</button>
+					</td>
+					<td width="90%">
+						<div class="btn-group btn-group-md" role="group">
+							<button class="btn btn-large btn-outline-success" type="button" style="padding: 12px 30px;" id="count_file_number">檔案數量統計</button>
+							<button class="btn btn-large btn-outline-success" type="button" style="padding: 12px 30px;" id="count_file_size">檔案大小統計</button>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>
+<div id="main"></div>
+<div class="modal hide" id="loadingModal">
+	<div style="width: 200px; height: 20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%; margin-left: -100px; margin-top: -10px">
+		<div class="progress progress-striped active"
+			style="margin-bottom: 0;">
+			<div class="progress-bar" style="width: 100%;"></div>
+		</div>
+		<h5>正在加載...</h5>
+	</div>
+</div>
+</body>
+</html>
